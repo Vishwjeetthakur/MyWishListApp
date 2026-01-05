@@ -43,7 +43,7 @@ fun HomeView(
                 modifier = Modifier.padding(20.dp),
                 contentColor = Color.White,
                 onClick = {
-                     navController.navigate(Screen.AddScreen.route)
+                     navController.navigate(Screen.AddScreen.route + "/0L")
                 }) {
                 Icon(imageVector = Icons.Default.Add,contentDescription = null)
             }
@@ -57,7 +57,8 @@ fun HomeView(
         ){
             items(wishList.value){
                 WishItem(it,{
-
+                         val id = it.id
+                    navController.navigate(Screen.AddScreen.route +"/$id")
                 })
             }
         }
@@ -71,7 +72,7 @@ fun WishItem(wish: Wish , onClick:() -> Unit){
     Card(
         modifier = Modifier.fillMaxWidth().padding(start = 8.dp , top = 8.dp, end = 8.dp)
             .clickable{
-                onClick
+                onClick()
             },
         elevation = 10.dp,
         backgroundColor = Color.White
