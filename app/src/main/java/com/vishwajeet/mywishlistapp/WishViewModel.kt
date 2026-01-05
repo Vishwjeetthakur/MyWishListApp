@@ -5,33 +5,60 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.vishwajeet.mywishlistapp.data.Wish
+import com.vishwajeet.mywishlistapp.data.WishRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
-class WishViewModel : ViewModel() {
+class WishViewModel(
+    private val wishRepository: WishRepository = Graph.wishRepository
+) : ViewModel() {
 
-    private val _wishlist = mutableStateOf(listOf<Wish>())
-    val wishlist : State<List<Wish>> = _wishlist
+
+
     var wishTitleState by mutableStateOf("")
     var wishDescriptionState by mutableStateOf("")
 
 
-
-    fun onWishTitleChange(title : String){
+    fun onWishTitleChange(title: String) {
         wishTitleState = title
     }
-    fun onWishDescriptionChange(newString : String){
+
+    fun onWishDescriptionChange(newString: String) {
         wishDescriptionState = newString
     }
 
-    fun updateAddItem(title: String , discription : String){
-        val newWish = Wish(
-            id = System.currentTimeMillis(),
-            title = title,
-            description = discription
-        )
-         _wishlist.value = _wishlist.value +newWish
-        wishTitleState = ""
-        wishDescriptionState = ""
+    lateinit var getAllWish : Flow<List<Wish>>
+
+    init {
+        viewModelScope.launch {
+            getAllWish = wishRepository.getWishes()
+        }
     }
+
+    fun addWish(wish: Wish){
+        viewModelScope.launch(Dispatchers.IO) {
+            wishRepository.addWish(wish=wish)
+        }
+    }
+
+    fun getAWishById(id : Long) : Flow<Wish>{
+            return wishRepository.gatAWishById(id)
+    }
+
+    fun updateWish(wish: Wish){
+        viewModelScope.launch(Dispatchers.IO) {
+            wishRepository.updateAWish(wish)
+        }
+    }
+
+    fun deleteWish(wish: Wish){
+        viewModelScope.launch (Dispatchers.IO){
+            wishRepository.deleteWish(wish)
+        }
+    }
+
 
 }

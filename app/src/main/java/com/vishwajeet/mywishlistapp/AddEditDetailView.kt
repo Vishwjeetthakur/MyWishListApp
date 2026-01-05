@@ -1,6 +1,5 @@
 package com.vishwajeet.mywishlistapp
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,24 +9,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.vishwajeet.mywishlistapp.data.Wish
+import kotlinx.coroutines.launch
 
 @Composable
 fun AddEditDetailView(
@@ -35,7 +35,15 @@ fun AddEditDetailView(
     viewModel: WishViewModel,
     navController: NavController
 ) {
-    Scaffold(
+
+    val snacckMessage = remember {
+        mutableStateOf("")
+    }
+    val scope = rememberCoroutineScope()
+
+    val scaffoldState = rememberScaffoldState()
+
+    Scaffold(scaffoldState = scaffoldState,
         topBar = {
             AppBar(title = if (id != 0L) stringResource(R.string.update_wish)
             else stringResource(R.string.add_wish)){
@@ -66,13 +74,30 @@ fun AddEditDetailView(
             Spacer(modifier = Modifier.height(10.dp))
 
             Button(onClick = {
+
+
                 if (viewModel.wishTitleState.isNotEmpty() &&
                     viewModel.wishDescriptionState.isNotEmpty()){
-               viewModel.updateAddItem(viewModel.wishTitleState,viewModel.wishDescriptionState)
+                       if (id != 0L){
+
+
+                       }else{
+                              viewModel.addWish(wish =
+                                  Wish(
+                                      title = viewModel.wishTitleState.trim(),
+                                      description = viewModel.wishDescriptionState.trim()
+                                  ))
+                            snacckMessage.value  ="Wish has been created"
+                       }
 
                 }else{
-                    Toast.makeText(context,"Please Fill the Title and Discription", Toast.LENGTH_LONG).show()
+                    snacckMessage.value = "Enter a fields to create a wish"
                 }
+                scope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar(snacckMessage.value)
+                    navController.navigateUp()
+                }
+
             }) {
                 Text( text = if (id != 0L) stringResource(R.string.update_wish)
                 else stringResource(R.string.add_wish),
